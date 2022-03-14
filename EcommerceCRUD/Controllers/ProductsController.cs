@@ -103,6 +103,33 @@ namespace EcommerceCRUD.Controllers
             _databaseContext.SaveChanges();
         }
 
+        [AllowAnonymous]
+        [HttpGet("/search/{searchparam}")]
+
+        public ActionResult<IEnumerable<Product>> Search(string searchparam)
+        {
+            try
+            {
+                var result = _databaseContext.Products.Where(product => product.Name.ToLower().Contains(searchparam.ToLower()));      
+
+                if (result.Any())
+                {
+                    foreach (var item in result)
+                    {
+                        item.ImageUrl = String.Format("{0}://{1}{2}/Images/{3}", Request.Scheme, Request.Host, Request.PathBase, item.ImageUrl);
+                    }
+                    return Ok(result);
+                }
+
+                return NotFound();
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error retrieving data from the database");
+            }
+        }
+
 
         
         [NonAction]
